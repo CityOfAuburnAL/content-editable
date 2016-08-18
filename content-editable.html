@@ -1,0 +1,162 @@
+﻿<link rel="import" href="../polymer/polymer.html" />
+<link rel="import" href="../iron-a11y-keys/iron-a11y-keys.html" />
+
+<!-- Behavior -->
+<link rel="import" href="content-editable-behaviors.html" />
+<!-- Tools -->
+<!-- //TODO - make user include them explicitly? -->
+<link rel="import" href="tools/content-editable-bold.html" />
+
+<dom-module id="content-editable">
+    <template strip-whitespace>
+        <style>
+            :host {
+                display: block;
+            }
+            div ::content button {
+                background: transparent;
+                border: none;
+            }
+            #editor {
+                background: #FFF;
+                width: 100%;
+
+                height: 300px;
+                overflow-y: scroll;
+            }
+            [hidden] { display: none !important; }
+        </style>
+
+        <iron-a11y-keys id="a11y" target="[[target]]"></iron-a11y-keys>
+
+        <pre hidden$="[[!debug]]">[[content]]</pre>
+        <div>
+            <content select="button"></content>
+        </div>
+        <p id="editor" contenteditable="true" inner-h-t-m-l="{{rawContent::input}}"></p>
+    </template>
+    <script>
+        Polymer({
+            is: 'content-editable',
+            properties: {
+                /**
+                *** Purpose: Determine if content is composed of paragraphs
+                **/
+                multiLine: {
+                    type: Boolean,
+                    value: false
+                },
+                target: Object,
+                rawContent: {
+                    type: String,
+                    notify: true
+                },
+                content: {
+                    type: String,
+                    notify: true,
+                    computed: '_scrub(rawContent)',
+                    observer: '_setVirtualContent'
+                },
+                virtualContent: {
+                    type: Object,
+                    notify: true,
+                    observer: '_initVirtualContent'
+                },
+                debug: {
+                    type: Boolean,
+                    value: false
+                }
+            },
+            add: function() {
+                document.execCommand('bold');
+            },
+            _scrub: function (content) {
+                var removes = [
+                    /&nbsp;/g
+                ];
+                if (!this.multiLine) removes.push(/<br>/g);//strip out linebreaks
+
+                for (var i = 0; i < removes.length; i++) {
+                    content = content.replace(removes[i], '');
+                }
+
+                var replacers = [
+                    { from: /b>/g, to: 'strong>' }
+                ];
+                for (var i = 0; i < replacers.length; i++) {
+                    content = content.replace(replacers[i].from, replacers[i].to);
+                }
+
+                return content;
+            },
+            _buildContent: function(node) {
+                var vDom = { };
+                if (!node.nodeName || node.nodeName == '#text') {
+                    //textstring
+                    vDom.type = 'textstring';
+                    vDom.props = { textContent: node.textContent };
+                } else {
+                    vDom.type = node.nodeName.toLowerCase();
+                    
+                    if (node.childNodes && node.childNodes.length > 0) {
+                        vDom.children = [];
+                        for (var i = 0; i < node.childNodes.length; i++) {
+                            vDom.children.push(this._buildContent(node.childNodes[i]));
+                        }
+                    }
+                }
+
+                return vDom;
+            },
+            _setVirtualContent: function () {
+
+                var parser = new DOMParser();
+                var parsedDOM = parser.parseFromString(this.content, 'text/html').body;
+                var virtualDom = [];
+                for (var i = 0; i < parsedDOM.childNodes.length; i++) {
+                    virtualDom.push(this._buildContent(parsedDOM.childNodes[i]));
+                }
+
+                this.set('virtualContent', virtualDom);
+            },
+            _initVirtualContent: function (virtualContent, oldVirtualContent) {
+                
+                if (virtualContent && !oldVirtualContent) {
+                    var editorContent = new DocumentFragment();
+                    for (var i = 0; i < this.virtualContent.length; i++) {
+                        this._loadVirtualContent(this.virtualContent[i], this.$.editor);
+                    }
+                    
+                    this.set('rawContent', this.$.editor.innerHTML);
+                }
+            },
+            _loadVirtualContent: function (virtualDom, dom) {
+                //create
+                var node;
+                if (virtualDom.type === 'textstring')
+                    node = document.createTextNode(virtualDom.props.textContent);
+                else
+                    node = Polymer.Base.create(virtualDom.type, virtualDom.props);
+                //append
+                Polymer.dom(dom).appendChild(node);
+                Polymer.dom.flush();
+                //children
+                if (virtualDom.children) {
+                    for (var i = 0; i < virtualDom.children.length; i++) {
+                        return this._loadVirtualContent(virtualDom.children[i], node);
+                    }
+                }
+
+                return dom;
+            },
+            attached: function () {
+                if (this.multiLine && !this.virtualContent)
+                    this.set('rawContent', '<p><br></p>');
+                else 
+                    this.set('rawContent', '<br>');//HACK - weird double first-letter bug
+
+                this.set('target', this.$.editor);
+            }
+        })
+    </script>
+</dom-module>

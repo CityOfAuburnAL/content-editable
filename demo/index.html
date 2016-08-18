@@ -1,0 +1,74 @@
+﻿<!doctype html>
+<html>
+<head>
+  <title>demo page</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1, user-scalable=yes">
+  <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+
+  <link rel="import" href="../../iron-icons/editor-icons.html">
+  <link rel="import" href="../content-editable.html">
+</head>
+
+<body unresolved>
+  <h3>Debug can be set to show the markup.</h3>
+  <template is="dom-bind">
+	  <content-editable debug></content-editable>
+  </template>
+  <h3>Buttons are located in ./tools and provide functionality. virtual-content stores the innerHTML as objects with type, props, and children properties.</h3>
+  <x-editable></x-editable>
+<dom-module id="x-editable">
+	<template>
+	  <style>
+		  :host {
+			  display: block;
+			  background: #C3C3C3;
+		  }
+
+		  content-editable {
+			  background: #FFF;
+		  }
+	  </style>
+	  
+	  <content-editable debug
+	  					virtual-content="{{virtualDom}}"
+						multi-line>
+		  <button is="content-editable-bold"><iron-icon icon="editor:format-bold"></iron-icon></button>
+	  </content-editable>
+	  <h4>Virtual Dom Results</h4>
+	  <p>[[showDom(virtualDom)]]</p>
+	</template>
+	<script>
+		HTMLImports.whenReady(function() {
+			Polymer({
+				is: 'x-editable',
+				properties: {
+					virtualDom : {
+						type: Object,
+						notify: true,
+						value: function() {
+							return [{
+								"type": "p",
+								"children": [
+									{"type": "textstring", "props": { "textContent": "This is paragraph 1."}}
+								]
+							},{
+								"type": "p",
+								"children": [
+									{"type": "textstring", "props": { "textContent": "This is the second paragraph."}}
+								]
+							}
+							];
+						}
+					}
+				},
+				showDom: function(virtualDom) {
+					return JSON.stringify(virtualDom);
+				}
+			});
+		});
+	</script>
+</dom-module>
+</body>
+
+</html>

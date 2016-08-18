@@ -1,0 +1,17 @@
+﻿<script>
+    ContentEditable = {
+        ToolBehavior : {
+            properties: {
+                command: String
+            },
+            listeners: {
+                click: '_doCommand'
+            },
+            _doCommand: function (evt) {
+                console.log(evt);
+                document.execCommand(this.command);
+                evt.preventDefault();
+            }
+        }
+    };
+</script>

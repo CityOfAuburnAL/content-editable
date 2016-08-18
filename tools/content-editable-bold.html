@@ -1,0 +1,26 @@
+﻿<link rel="import" href="../content-editable-behaviors.html" />
+
+<dom-module id="content-editable-bold">
+    <template strip-whitespace>
+        <style>
+            :host {
+                display: inline-block;
+            }
+        </style>
+
+        <content></content>
+    </template>
+    <script>
+        Polymer({
+            is: 'content-editable-bold',
+            extends: 'button',
+            properties: {
+                command: {
+                    type: String,
+                    value: function () { return 'bold'; }
+                }
+            },
+            behaviors: [ContentEditable.ToolBehavior]
+        });
+    </script>
+</dom-module>
