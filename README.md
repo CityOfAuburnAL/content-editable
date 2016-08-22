@@ -75,6 +75,13 @@ A special thanks to:
 
 Changelog available [here](https://github.com/CityOfAuburnAL/polymer-cookie/blob/master/CHANGELOG.md)
 
+## References
+
+1.  Example polymer element wysiwyg (wysiwyg-e): `https://github.com/miztroh/wysiwyg-e`
+2.  Tutorial using HTML5 contenteditable to create a wysiwyg: `https://newcircle.com/s/post/1096/using_the_html5_attribute_contenteditable_to_create_a_wysiwyg`
+3.  MDN web reference for execCommand: `https://developer.mozilla.org/en-US/docs/Web/API/Document/execCommand`
+4.  Codepen example for execCommand: `http://codepen.io/netsi1964/pen/QbLLGW` 
+
 ## License
 
 [MIT License](https://github.com/CityOfAuburnAL/polymer-cookie/blob/master/LICENSE)
