@@ -149,7 +149,7 @@
 
                 return dom;
             },
-            attached: function () {
+            ready: function () {
                 if (this.multiLine && !this.virtualContent)
                     this.set('rawContent', '<p><br></p>');
                 else 
